@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "public": "web/out",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "/api/receivePayment", "function": "receivePayment" },
+      { "source": "/api/claimDeposit", "function": "claimDeposit" }
+    ]
+  },
+  "functions": [{ "source": "functions", "codebase": "default" }],
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

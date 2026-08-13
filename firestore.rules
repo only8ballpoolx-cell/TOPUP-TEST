@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Keep this list identical to web/lib/admin.ts ADMIN_EMAILS.
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.token.email in ['youradmin@example.com'];
+    }
+
+    // Users can read their own profile/balance, but NEVER write balance
+    // directly — only Cloud Functions (Admin SDK, bypasses rules) may
+    // change it. This is what stops someone editing balance from the
+    // browser console.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Orders: a signed-in user may create their own pending order with
+    // no price tampering... price/product still gets re-validated
+    // server-side in processTopupOrder before any balance is touched.
+    match /orders/{orderId} {
+      allow read: if request.auth != null &&
+                  (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+      allow update, delete: if false;
+    }
+
+    match /deposits/{id} {
+      allow read: if request.auth != null &&
+                  (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false; // only written by claimDeposit function
+    }
+
+    match /incomingPayments/{trxId} {
+      allow read, write: if false; // only Admin SDK (webhook + claim fn) touches this
+    }
+
+    match /settings/{doc} {
+      allow read: if true;      // public site config (logo, name, etc.)
+      allow write: if isAdmin(); // only allowlisted admin emails
+    }
+
+    match /services/{serviceId}/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
