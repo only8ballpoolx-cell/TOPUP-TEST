@@ -6,7 +6,7 @@ ff-topup-site/
 ├─ web/            → Next.js (React) ফ্রন্টএন্ড — storefront UI, এখানেই future UI update হবে
 ├─ functions/       → Firebase Cloud Functions — সব secret/API key এখানে থাকে (browser-এ যায় না)
 ├─ firestore.rules  → ডাটাবেস সিকিউরিটি রুলস
-└─ firebase.json    → Firebase Hosting + Functions wiring
+└─ firebase.json    → Firebase Hosting + Fun ctions wiring
 ```
 
 ## ১. Firebase প্রজেক্ট বানানো
